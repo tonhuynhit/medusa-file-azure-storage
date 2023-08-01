@@ -1,6 +1,6 @@
 {
   "name": "medusa-file-azure-storage",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Azure storage file connector for Medusa",
   "main": "dist/index.js",
   "files": [
@@ -39,7 +39,6 @@
     "medusa-core-utils": "^1.2.0",
     "medusa-test-utils": "^1.1.40"
   },
-  "gitHead": "81a7ff73d012fda722f6e9ef0bd9ba0232d37808",
   "keywords": [
     "medusa-plugin",
     "medusa-plugin-file",

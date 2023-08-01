@@ -16,6 +16,7 @@ import {
 import stream from "stream"
 
 class AzureStorageService extends AbstractFileService implements IFileService {
+  private readonly PRIVATE_ACCESS_LEVEL: string = "private"
   protected blobServiceClient_: BlobServiceClient
   protected connectionString_: string
   protected publicContainerName_: string
@@ -37,7 +38,6 @@ class AzureStorageService extends AbstractFileService implements IFileService {
     const containerClient = this.blobServiceClient_.getContainerClient(containerName);
     await containerClient.createIfNotExists(options)
 
-    // create blob client
     const blobClient = await containerClient.getBlockBlobClient(blobName);
     return blobClient
   }
@@ -46,7 +46,7 @@ class AzureStorageService extends AbstractFileService implements IFileService {
     const containerOptions : ContainerCreateOptions = {}
     let container = this.protectedContainerName_
 
-    if(accessLevel !== "private"){
+    if(accessLevel !== this.PRIVATE_ACCESS_LEVEL){
       containerOptions.access = "container"
       container = this.publicContainerName_
     }
@@ -58,17 +58,19 @@ class AzureStorageService extends AbstractFileService implements IFileService {
   }
 
   async uploadProtected(file: Express.Multer.File) {
+    //batch job didn't send access_level file
+    //return await this.uploadFile(file, this.PRIVATE_ACCESS_LEVEL)
     return await this.uploadFile(file)
   }
 
-  async uploadFile(file: Express.Multer.File) {
+  async uploadFile(file: Express.Multer.File, accessLevel: string = "public") {
     const parsedFilename = parse(file.originalname)
     const fileKey = `${parsedFilename.name}-${Date.now()}${parsedFilename.ext}`
-    const blobClient = await this.getBlobClient(fileKey)
-    const uploadResponse = await blobClient.uploadStream(fs.createReadStream(file.path));
+    const blobClient = await this.getBlobClient(fileKey, accessLevel)
+    await blobClient.uploadStream(fs.createReadStream(file.path));
 
     return {
-      url: uploadResponse._response.request.url,
+      url: blobClient.url,
       key: fileKey,
     }
   }
@@ -93,7 +95,8 @@ class AzureStorageService extends AbstractFileService implements IFileService {
 
   async getDownloadStream(fileData: GetUploadedFileType): Promise<NodeJS.ReadableStream> {
     const blobClient = await this.getBlobClient( fileData.fileKey, fileData.acl)
-    return (await blobClient.downloadToFile(fileData.fileKey)).readableStreamBody as NodeJS.ReadableStream
+    const downloadResponse  = await blobClient.download();
+    return downloadResponse.readableStreamBody as NodeJS.ReadableStream
   }
 
   async getPresignedDownloadUrl(

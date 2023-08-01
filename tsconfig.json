@@ -3,6 +3,7 @@
     "lib": ["es5", "es6", "es2019"],
     "target": "es5",
     "outDir": "./dist",
+    "rootDir": "src",
     "esModuleInterop": true,
     "declaration": true,
     "module": "commonjs",
@@ -17,14 +18,13 @@
     "allowJs": true,
     "skipLibCheck": true,
     "downlevelIteration": true,
-    "sourceRoot": "E:/projects/Medusa/medusa/packages/medusa-file-azure-storage/src"
   },
-  "include": ["./src/**/*", "index.d.ts"],
+  "include": ["src"],
   "exclude": [
-    "./dist/**/*",
-    "./src/**/__tests__",
-    "./src/**/__mocks__",
-    "./src/**/__fixtures__",
+    "dist",
+    "src/**/__tests__",
+    "src/**/__mocks__",
+    "src/**/__fixtures__",
     "node_modules"
   ]
 }
